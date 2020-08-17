@@ -23,6 +23,17 @@ namespace DiscordRCON.Commands
             {
                 s = guild.Servers[ID];
             }
+            else if(server.ToLower() == "all")
+            {
+                foreach(var serv in guild.Servers)
+                {
+                    if (serv.RconPwd == "") continue;
+                    var inst = Query.GetServerInstance(serv.Address, serv.RconPwd);
+                    inst.Rcon.SendCommand(command);
+                }
+
+                await ReplyAsync("Sent command to all servers with RCON enabled!");
+            }
 
             if (string.IsNullOrWhiteSpace(s.RconPwd))
             {
@@ -47,7 +58,7 @@ namespace DiscordRCON.Commands
         {
             var prefix = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Prefix;
             await ReplyAsync("```json\n" +
-                $"\"{prefix}rcon send <IP:PORT|Server ID> <command>\" - Sends a custom user-specified command" +
+                $"\"{prefix}rcon send <IP:PORT|Server ID|all> <command>\" - Sends a custom user-specified command" +
                 $"```");
         }
     }

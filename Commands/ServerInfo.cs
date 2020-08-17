@@ -27,7 +27,7 @@ namespace DiscordRCON.Commands
         }
 
         [Command("watch"), Alias("add")]
-        public async Task AddServer(string IP, string RconPwd = "")
+        public async Task AddServer(string IP, string RconPwd = null)
         {
             await Context.Message.DeleteAsync();
             var server = Database.AddServerToWatchlist(Context.Guild.Id, IP, RconPwd);
@@ -62,19 +62,19 @@ namespace DiscordRCON.Commands
             var servers = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Servers.ToArray();
             builder.WithDescription("");
 
-            for (int i = 1; i < servers.Length; i++)
+            for (int i = 1; i < servers.Length + 1; i++)
             {
                 if (builder.Description.Length < 1984)
                 {
-                    builder.Description += $"[{i}] {servers[i].Name}";
+                    builder.Description += $"[{i}] {servers[i - 1].Name}";
 
-                    if(servers[i].RconPwd == null) builder.Description += " [NO RCON]";
+                    if(servers[i - 1].RconPwd == null) builder.Description += " [NO RCON]";
                     builder.Description += "\n";
                 }
             }
 
 
-            builder.WithFooter("The number in the brackets [ ] is the ID you should use when sending RCON commands to specific servers.");
+            builder.WithFooter("The number in the brackets [ ] is the ID you should use when sending RCON commands to specific servers. IP:PORT can also be used.");
 
             await Context.Channel.SendMessageAsync("", false, builder.Build());
         }
@@ -110,9 +110,9 @@ namespace DiscordRCON.Commands
             await ReplyAsync($"```json\n" +
                 $"\"{prefix}server status <IP:PORT>\" - returns information about a specific server.\n" +
                 $"\"{prefix}server watch|add <IP:PORT> <rconPwd (optional)>\" - Add server to watchlist\n" +
-                $"\"{prefix}server unwatch|remove <IP:PORT>|<Server ID>\" - Remove server from watchlist\n" +
+                $"\"{prefix}server unwatch|remove <IP:PORT|Server ID>\" - Remove server from watchlist\n" +
                 $"\"{prefix}server watchlist|wl\" - View server watchlist\n" +
-                $"\"{prefix}server updatepwd|rconpwd|pwd <IP:PORT>|<Server ID> <RCON password>\" - Update RCON password" +
+                $"\"{prefix}server updatepwd|rconpwd|pwd <IP:PORT|Server ID> <RCON password>\" - Update RCON password" +
                 $"```");
         }
     }

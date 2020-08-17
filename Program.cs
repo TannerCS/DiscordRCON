@@ -40,6 +40,11 @@ namespace DiscordRCON
         {
             if (!Database.CreateNewGuild(arg.Id)) await Log(new LogMessage(LogSeverity.Critical, "Database", "Could not create new guild in Database"));
             else await Log(new LogMessage(LogSeverity.Debug, "Database", $"Created new Guild entry: {arg.Name}"));
+
+            await arg.Owner.SendMessageAsync($"Hello there! Thanks for inviting me to your server. " +
+                $"I'm a bot, obviously, made to make *your* life easier. Now, while chatting with your friends on Discord, you can kick and ban them without even switching windows! " +
+                $"Only you are allowed to use these commands (for now). I'm in *very* early stages of development, so please be patient with me. Sometimes things may not work on the first try. " +
+                $"If they don't, send me a message with a screenshot and a guide on how I can reproduce this error. Enjoy! Tanner#5116");
         }
 
         public static async Task Log(LogMessage msg)
@@ -81,15 +86,16 @@ namespace DiscordRCON
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
-            var message = messageParam as SocketUserMessage;
-            if (message == null || message.Channel is IDMChannel) return;
-
             int argPos = 0;
-            
-            if (!(message.HasStringPrefix(Database.GetGuildPrefix((message.Channel as IGuildChannel).GuildId), ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
-                message.Author.IsBot)
+
+            if (!(messageParam is SocketUserMessage message) || message.Author.IsBot || !(message.HasStringPrefix(Database.GetGuildPrefix((message.Channel as IGuildChannel).GuildId), ref argPos) ||
+                message.HasMentionPrefix(_client.CurrentUser, ref argPos))) return;
+
+            if (message.Channel is IDMChannel)
+            {
+                await message.Channel.SendMessageAsync("I don't support DM commands! Try me in a private channel in a Guild!");
                 return;
+            }
 
             var context = new SocketCommandContext(_client, message);
             

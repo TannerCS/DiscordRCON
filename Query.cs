@@ -11,13 +11,13 @@ namespace DiscordRCON
 {
     public class Query
     {
-        public static Server QueryServer(string IP, string RconPwd = "")
+        public static Server QueryServer(string IP, string RconPwd = null)
         {
             string[] formattedIP = IP.Split(':');
-            QueryMaster.GameServer.Server server = ServerQuery.GetServerInstance(Game.Rust, new IPEndPoint(IPAddress.Parse(formattedIP[0]), int.Parse(formattedIP[1])), sendTimeout: 500, receiveTimeout: 500, throwExceptions: true);
+            QueryMaster.GameServer.Server server = ServerQuery.GetServerInstance(Game.Rust, new IPEndPoint(IPAddress.Parse(formattedIP[0]), int.Parse(formattedIP[1])), sendTimeout: 500, receiveTimeout: 500);
             ServerInfo info = server.GetInfo();
 
-            if(RconPwd != "") if (!server.GetControl(RconPwd)) RconPwd = "";
+            if(RconPwd != null) if (!server.GetControl(RconPwd)) RconPwd = null;
 
             return new Server()
             {

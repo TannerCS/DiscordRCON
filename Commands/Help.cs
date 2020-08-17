@@ -16,7 +16,7 @@ namespace DiscordRCON.Commands
             var prefix = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Prefix;
             await ReplyAsync("```json\n" +
                 $"Command Usage Guide\n" +
-                $"Example command: \"!server add <IP:PORT>|<Server ID> <RCON Password (Optional)>\"\n" +
+                $"Example command: \"!server add <IP:PORT|Server ID> <RCON Password (Optional)>\"\n" +
                 $"- \"<>\" means a field is required (unless it has an \"(optional)\" flag)\n" +
                 $"- \"|\" means \"or\". It can take an IP and port \"or\" a server ID\n" +
                 $"------------------------------------------------------\n" +

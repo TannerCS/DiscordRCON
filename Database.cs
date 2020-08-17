@@ -25,7 +25,7 @@ namespace DiscordRCON
 
                 Program.Log(new LogMessage(LogSeverity.Info, "Database", $"Database Loaded Successfully. {Guilds.Count} guilds loaded."));
             }
-            catch(Exception e)
+            catch (Exception)
             {
 
             }
@@ -48,7 +48,7 @@ namespace DiscordRCON
                 Guilds.Add(guild);
 
                 return true;
-            }catch(Exception e)
+            }catch(Exception)
             {
                 return false;
             }
@@ -62,7 +62,7 @@ namespace DiscordRCON
                 col.Update(guild);
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
@@ -132,14 +132,14 @@ namespace DiscordRCON
                     return true;
                 }
 
-                int ID = int.Parse(IP);
+                int ID = int.Parse(IP) - 1;
                 var server = guild.Servers.ElementAtOrDefault(ID);
 
                 if (server == null) return false;
 
                 guild.Servers.Remove(server);
                 col.Update(guild);
-                Guilds.Find(x => x.GuildID == guild.GuildID).Servers.Remove(server);
+                Guilds.Find(x => x.GuildID == guild.GuildID).Servers.RemoveAt(ID);
                 return true;
             }
             catch (Exception e)
