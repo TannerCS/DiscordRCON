@@ -13,7 +13,8 @@ namespace DiscordRCON.Commands
         [Command("help")]
         public async Task HelpInfo()
         {
-            var prefix = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Prefix;
+            var prefix = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Prefix; //Get prefix
+
             await ReplyAsync("```json\n" +
                 $"Command Usage Guide\n" +
                 $"Example command: \"!server add <IP:PORT|Server ID> <RCON Password (Optional)>\"\n" +

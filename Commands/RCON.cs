@@ -11,44 +11,52 @@ namespace DiscordRCON.Commands
     public class RCON : ModuleBase<SocketCommandContext>
     {
         [Command("send")]
-        public async Task SendCommand(string server, [Remainder]string command)
+        public async Task SendCommand(string ip, [Remainder]string command)
         {
-            var guild = Database.Guilds.First(x => x.GuildID == Context.Guild.Id);
-            Query.Server s = null;
-            if(server.Split(':').Length == 2)
+            var guild = Database.Guilds.First(x => x.GuildID == Context.Guild.Id); //Get guild
+            Query.Server server = null;
+
+            //If ip can be split into IP and PORT
+            if(ip.Split(':').Length == 2)
             {
-                s = guild.Servers.FirstOrDefault(x => x.Address == server);
+                server = guild.Servers.FirstOrDefault(x => x.Address == ip);
             }
-            else if(int.TryParse(server, out int ID))
+            //If ip is a server ID
+            else if(int.TryParse(ip, out int id))
             {
-                s = guild.Servers[ID];
+                server = guild.Servers[id - 1];
             }
-            else if(server.ToLower() == "all")
+            //If ip is all, meaning go through ALL servers
+            else if(ip.ToLower() == "all")
             {
                 foreach(var serv in guild.Servers)
                 {
-                    if (serv.RconPwd == "") continue;
-                    var inst = Query.GetServerInstance(serv.Address, serv.RconPwd);
-                    inst.Rcon.SendCommand(command);
+                    if (serv.RconPwd == null) continue; //If server doesn't have an RCON password, skip it
+
+                    //Get srever instance and send the command
+                    var serverInstance = Query.GetServerInstance(serv.Address, serv.RconPwd);
+                    serverInstance.Rcon.SendCommand(command);
                 }
 
                 await ReplyAsync("Sent command to all servers with RCON enabled!");
+                return;
             }
 
-            if (string.IsNullOrWhiteSpace(s.RconPwd))
+            //If RCON password is null, then we can't send a command
+            if (server.RconPwd == null)
             {
                 await ReplyAsync($"RCON is not available for this server. Try updating your RCON password (hint: {guild.Prefix}server).");
                 return;
             }
 
-            var instance = Query.GetServerInstance(s.Address, s.RconPwd);
-
-            if (instance == null)
+            var instance = Query.GetServerInstance(server.Address, server.RconPwd); //Get server instance with RCON enabled
+            if (instance == null) //If instance is null, then we couldn't successfully get an RCON instance
             {
                 await ReplyAsync($"RCON is not available for this server. Try updating your RCON password (hint: {guild.Prefix}server).");
                 return;
             }
 
+            //Send command and echo back response
             string res = instance.Rcon.SendCommand(command);
             await ReplyAsync(res);
         }
@@ -56,7 +64,8 @@ namespace DiscordRCON.Commands
         [Command]
         public async Task Info()
         {
-            var prefix = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Prefix;
+            var prefix = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Prefix; //Get prefix
+
             await ReplyAsync("```json\n" +
                 $"\"{prefix}rcon send <IP:PORT|Server ID|all> <command>\" - Sends a custom user-specified command" +
                 $"```");

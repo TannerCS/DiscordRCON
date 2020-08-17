@@ -11,13 +11,17 @@ namespace DiscordRCON
 {
     public class Query
     {
-        public static Server QueryServer(string IP, string RconPwd = null, int RconPort = 0)
+        public static Server QueryServer(string ip, string rconPwd = null, int rconPort = 0)
         {
-            string[] formattedIP = IP.Split(':');
-            QueryMaster.GameServer.Server server = ServerQuery.GetServerInstance(Game.Rust, new IPEndPoint(IPAddress.Parse(formattedIP[0]), int.Parse(formattedIP[1])), sendTimeout: 500, receiveTimeout: 500);
+            string[] formattedIP = ip.Split(':'); //split IP into IP and port
+
+            //Get server instance 
+            QueryMaster.GameServer.Server server = GetServerInstance(ip, rconPwd);
             ServerInfo info = server.GetInfo();
 
-            if(RconPwd != null) if (!server.GetControl(RconPwd)) RconPwd = null;
+            //If RCON password has been submitted, check to see if it's correct.
+            //If not, then set RCON password back to null because it's incorrect
+            if (rconPwd != null) if (!server.GetControl(rconPwd)) rconPwd = null;
 
             return new Server()
             {
@@ -26,22 +30,26 @@ namespace DiscordRCON
                 MaxPlayers = info.MaxPlayers,
                 Name = info.Name,
                 Players = info.Players,
-                RconPwd = RconPwd,
-                RconPort = RconPort
+                RconPwd = rconPwd,
+                RconPort = rconPort
             };
         }
 
         public static Player FindPlayer(string player)
         {
-            return new Player();
+            throw new NotImplementedException("Not yet implemented!");
         }
 
-        public static QueryMaster.GameServer.Server GetServerInstance(string IP, string RconPwd)
+        public static QueryMaster.GameServer.Server GetServerInstance(string ip, string rconPwd = null)
         {
-            string[] formattedIP = IP.Split(':');
-            QueryMaster.GameServer.Server server = ServerQuery.GetServerInstance(Game.Rust, new IPEndPoint(IPAddress.Parse(formattedIP[0]), int.Parse(formattedIP[1])), throwExceptions: true);
+            string[] formattedIP = ip.Split(':');
+            var ipEndpoint = new IPEndPoint(IPAddress.Parse(formattedIP[0]), int.Parse(formattedIP[1]));
 
-            if (!server.GetControl(RconPwd)) return null;
+            //Get server instance
+            QueryMaster.GameServer.Server server = ServerQuery.GetServerInstance(Game.Rust, ipEndpoint, sendTimeout: 500, receiveTimeout: 500, throwExceptions: true);
+
+            //If rconPwd is not null, check if we can get control of RCON
+            if(rconPwd != null) if(!server.GetControl(rconPwd)) return null;
 
             return server;
         }
@@ -59,7 +67,7 @@ namespace DiscordRCON
 
         public class Player
         {
-
+            //TODO: fill this out
         }
     }
 }
