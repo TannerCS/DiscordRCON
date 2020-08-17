@@ -36,8 +36,8 @@ namespace QueryMaster.GameServer
 {
     internal class ServerSocket : QueryMasterBase
     {
-        internal static readonly int UdpBufferSize = 1400;
-        internal static readonly int TcpBufferSize = 4110;
+        internal static readonly int UdpBufferSize = 10200;
+        internal static readonly int TcpBufferSize = 8220;
         internal IPEndPoint Address = null;
         protected internal int BufferSize = 0;
         internal EngineType EngineType { get; set; }

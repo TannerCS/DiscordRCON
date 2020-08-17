@@ -27,6 +27,7 @@ namespace DiscordRCON
             _client.Log += Log;
             _client.MessageReceived += HandleCommandAsync;
             _client.JoinedGuild += JoinedGuild;
+            _client.Ready += Ready;
 
             await _client.LoginAsync(TokenType.Bot, File.ReadAllText("token.txt"));
             await _client.StartAsync();
@@ -34,6 +35,35 @@ namespace DiscordRCON
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
 
             await Task.Delay(-1);
+        }
+
+        private async Task Ready()
+        {
+            foreach (var guild in Database.Guilds)
+            {
+                foreach (var server in guild.Servers)
+                {
+                    if (server.RconPwd == null) continue;
+
+                    var instance = Query.GetServerInstance(server.Address, server.RconPwd);
+
+                    if (instance == null) continue;
+
+                    if (server.RconPort == 0) continue; 
+                    
+                    instance.Rcon.Enablelogging();
+
+                    var logs = instance.GetLogs(server.RconPort);
+                    logs.Start();
+                    logs.Callback += Callback;
+                    await Log(new LogMessage(LogSeverity.Info, "Logs", $"Started logging for {server.Name}"));
+                }
+            }
+        }
+
+        public static void Callback(string log)
+        {
+            Console.WriteLine($"[LOG] {log}");
         }
 
         private async Task JoinedGuild(SocketGuild arg)

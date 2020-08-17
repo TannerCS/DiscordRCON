@@ -88,19 +88,35 @@ namespace DiscordRCON
             return Guilds.First(x => x.GuildID == GuildID).Prefix;
         }
 
-        public static Tuple<bool, string> AddServerToWatchlist(ulong GuildID, string IP, string RconPwd)
+        public static Tuple<bool, string> AddServerToWatchlist(ulong GuildID, string IP, string RconPwd, int RconPort)
         {
             try
             {
                 var col = Db.GetCollection<Guild>("guilds");
                 var guild = col.FindOne(x => x.GuildID == GuildID);
-                var server = Query.QueryServer(IP, RconPwd);
+                var server = Query.QueryServer(IP, RconPwd, RconPort);
 
                 if (guild.Servers.FirstOrDefault(x => x.Address == IP) == null) guild.Servers.Add(server);
                 else return new Tuple<bool, string>(false, "");
 
                 col.Update(guild);
                 Guilds.Find(x => x.GuildID == guild.GuildID).Servers.Add(server);
+
+                if(RconPwd != null)
+                {
+                    var instance = Query.GetServerInstance(server.Address, server.RconPwd);
+
+                    if (instance == null) return new Tuple<bool, string>(false, "");
+
+                    if (server.RconPort == 0) return new Tuple<bool, string>(false, "");
+
+                    instance.Rcon.Enablelogging();
+
+                    var logs = instance.GetLogs(server.RconPort);
+                    logs.Start();
+                    logs.Callback += Program.Callback;
+                    Program.Log(new LogMessage(LogSeverity.Info, "Logs", $"Started logging for {server.Name}"));
+                }
 
                 return new Tuple<bool, string>(true, server.Name);
             }catch(Exception e)

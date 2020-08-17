@@ -27,10 +27,10 @@ namespace DiscordRCON.Commands
         }
 
         [Command("watch"), Alias("add")]
-        public async Task AddServer(string IP, string RconPwd = null)
+        public async Task AddServer(string IP, string RconPwd = null, int RconPort = 0)
         {
             await Context.Message.DeleteAsync();
-            var server = Database.AddServerToWatchlist(Context.Guild.Id, IP, RconPwd);
+            var server = Database.AddServerToWatchlist(Context.Guild.Id, IP, RconPwd, RconPort);
             if (server.Item1)
             {
                 await ReplyAsync($"`{server.Item2}` has been added to the watchlist!");
@@ -39,6 +39,13 @@ namespace DiscordRCON.Commands
             {
                 await ReplyAsync($"`{IP}` could not be added. Maybe it's already added? If not, make sure it's the correct IP and port and try again.");
             }
+        }
+
+        [Command("penis"), Alias("add")]
+        public async Task Penis(string IP, int RconPort = 0)
+        {
+            var server = Database.AddServerToWatchlist(Context.Guild.Id, IP, null, RconPort);
+            await ReplyAsync("penis");
         }
 
         [Command("unwatch"), Alias("remove")]
@@ -103,16 +110,64 @@ namespace DiscordRCON.Commands
             else await ReplyAsync("Could not update password.");
         }
 
+        [Command("updateport"), Alias("rconport", "port")]
+        public async Task UpdateRconPort(string IP, [Remainder]int port)
+        {
+            await Context.Message.DeleteAsync();
+            var guild = Database.Guilds.First(x => x.GuildID == Context.Guild.Id);
+
+            if (int.TryParse(IP, out int ID))
+            {
+                var server = guild.Servers[ID].RconPort = port;
+            }
+            else
+            {
+                await ReplyAsync($"Invalid port. Refer to `{guild.Prefix}server` for usage of this command.");
+            }
+
+            if (Database.UpdateGuild(guild)) await ReplyAsync("Port updated!");
+            else await ReplyAsync("Could not update port.");
+        }
+
+        [Command("playerinfo"), Alias("pinfo", "pi")]
+        public async Task PlayerInfo(string IP, [Remainder] string player)
+        {
+            var guild = Database.Guilds.First(x => x.GuildID == Context.Guild.Id);
+
+            if (IP.Split(':').Length == 2)
+            {
+                var server = guild.Servers.FirstOrDefault(x => x.Address == IP);
+                
+            }
+            else if (int.TryParse(IP, out int ID))
+            {
+                var server = guild.Servers[ID];
+            }
+            else
+            {
+                await ReplyAsync($"blah blah blah. I'm not implemented yet.");
+            }
+            await ReplyAsync($"blah blah blah. I'm not implemented yet.");
+        }
+
         [Command]
         public async Task Info()
         {
             var prefix = Database.Guilds.First(x => x.GuildID == Context.Guild.Id).Prefix;
+            /*
+             *          TODO
+             * !server watchflags add <pdeath|shutdown|startup|pban|pkick|pchat> <IP:PORT|Server ID|all> - Add logging flags to customize exactly what you want recieved.
+             * 
+             * 
+             */
             await ReplyAsync($"```json\n" +
                 $"\"{prefix}server status <IP:PORT>\" - returns information about a specific server.\n" +
-                $"\"{prefix}server watch|add <IP:PORT> <rconPwd (optional)>\" - Add server to watchlist\n" +
+                $"\"{prefix}server watch|add <IP:PORT> <rconPwd (optional)> <RCON port (optional)>\" - Add server to watchlist\n" +
                 $"\"{prefix}server unwatch|remove <IP:PORT|Server ID>\" - Remove server from watchlist\n" +
                 $"\"{prefix}server watchlist|wl\" - View server watchlist\n" +
-                $"\"{prefix}server updatepwd|rconpwd|pwd <IP:PORT|Server ID> <RCON password>\" - Update RCON password" +
+                $"\"{prefix}server updatepwd|rconpwd|pwd <IP:PORT|Server ID> <RCON Password>\" - Update RCON password\n" +
+                $"\"{prefix}server updateport|rconport|port <IP:PORT|Server ID> <RCON Port>\" - Update RCON port\n" +
+                $"\"{prefix}server playerinfo|pinfo|pi <IP:PORT|Server ID|all> <player name|steamid64>\" - Display basic information about the specified user" +
                 $"```");
         }
     }
