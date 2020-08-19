@@ -24,7 +24,7 @@ namespace DiscordRCON
             }
             catch (Exception e)
             {
-                Program.Log(new LogMessage(LogSeverity.Critical, "Database", $"Could not load database!\n {e}"));
+                Logger.Log(new LogMessage(LogSeverity.Critical, "Database", $"Could not load database!\n {e}"));
             }
         }
 
@@ -46,7 +46,7 @@ namespace DiscordRCON
                 return true; //Function returns successfully
             }catch(Exception e)
             {
-                Program.Log(new LogMessage(LogSeverity.Critical, "CreateNewGuild", $"Could not create new guild! ({guildID})\n {e}"));
+                Logger.Log(new LogMessage(LogSeverity.Critical, "CreateNewGuild", $"Could not create new guild! ({guildID})\n {e}"));
                 return false;
             }
         }
@@ -64,7 +64,7 @@ namespace DiscordRCON
                 return true;
             }catch(Exception e)
             {
-                Program.Log(new LogMessage(LogSeverity.Critical, "ChangePrefix", $"Could not change prefix! ({guildID}, {prefix})\n {e}"));
+                Logger.Log(new LogMessage(LogSeverity.Critical, "ChangePrefix", $"Could not change prefix! ({guildID}, {prefix})\n {e}"));
                 return false;
             }
         }
@@ -103,13 +103,13 @@ namespace DiscordRCON
                     logs.Start();
                     logs.Callback += Program.Callback;
 
-                    Program.Log(new LogMessage(LogSeverity.Info, "AddServerToWatchlist", $"Started logging for {server.Name}"));
+                    Logger.Log(new LogMessage(LogSeverity.Info, "AddServerToWatchlist", $"Started logging for {server.Name}"));
                 }
 
                 return new Tuple<bool, string>(true, server.Name);
             }catch(Exception e)
             {
-                Program.Log(new LogMessage(LogSeverity.Critical, "AddServerToWatchlist", $"Could not add server to watchlist ({guildID}, {ip}\n {e}"));
+                Logger.Log(new LogMessage(LogSeverity.Critical, "AddServerToWatchlist", $"Could not add server to watchlist ({guildID}, {ip}\n {e}"));
                 return new Tuple<bool, string>(false, "");
             }
         }
@@ -123,7 +123,7 @@ namespace DiscordRCON
                 return true;
             }catch(Exception e)
             {
-                Program.Log(new LogMessage(LogSeverity.Critical, "UpdateGuild", $"Could not update guild ({guild.GuildID})\n {e}"));
+                Logger.Log(new LogMessage(LogSeverity.Critical, "UpdateGuild", $"Could not update guild ({guild.GuildID})\n {e}"));
                 return false;
             }
         }
@@ -171,7 +171,7 @@ namespace DiscordRCON
             }
             catch (Exception e)
             {
-                Program.Log(new LogMessage(LogSeverity.Critical, "RemoveServerFromWatchlist", $"Could not remove server from watchlist ({guildID}, {ip}\n {e}"));
+                Logger.Log(new LogMessage(LogSeverity.Critical, "RemoveServerFromWatchlist", $"Could not remove server from watchlist ({guildID}, {ip}\n {e}"));
                 return false;
             }
         }

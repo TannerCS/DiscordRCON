@@ -24,7 +24,7 @@ namespace DiscordRCON
             _Commands = new CommandService();
             new Database();
 
-            _Client.Log += LogAsync;
+            _Client.Log += Logger.LogAsync;
             _Client.MessageReceived += HandleCommandAsync;
             _Client.JoinedGuild += JoinedGuild;
             _Client.Ready += Ready;
@@ -59,7 +59,7 @@ namespace DiscordRCON
                     logs.Start();
                     logs.Callback += Callback;
 
-                    await LogAsync(new LogMessage(LogSeverity.Info, "Logs", $"Started logging for {server.Name}"));
+                    await Logger.LogAsync(new LogMessage(LogSeverity.Info, "Logs", $"Started logging for {server.Name}"));
                 }
             }
         }
@@ -73,89 +73,13 @@ namespace DiscordRCON
         private async Task JoinedGuild(SocketGuild guild)
         {
             //If CreateNewGuild returns FALSE (can't create new guild), log message. If it returns true (else), then it created the new guild successfully.
-            if (!Database.CreateNewGuild(guild.Id)) await LogAsync(new LogMessage(LogSeverity.Critical, "Database", "Could not create new guild in Database"));
-            else await LogAsync(new LogMessage(LogSeverity.Debug, "Database", $"Created new Guild entry: {guild.Name}"));
+            if (!Database.CreateNewGuild(guild.Id)) await Logger.LogAsync(new LogMessage(LogSeverity.Critical, "Database", "Could not create new guild in Database"));
+            else await Logger.LogAsync(new LogMessage(LogSeverity.Debug, "Database", $"Created new Guild entry: {guild.Name}"));
 
             await guild.Owner.SendMessageAsync($"Hello there! Thanks for inviting me to your server. " +
                 $"I'm a bot, obviously, made to make *your* life easier. Now, while chatting with your friends on Discord, you can kick and ban them without even switching windows! " +
                 $"Only you are allowed to use these commands (for now). I'm in *very* early stages of development, so please be patient with me. Sometimes things may not work on the first try. " +
                 $"If they don't, send me a message with a screenshot and a guide on how I can reproduce this error. Enjoy! Tanner#5116");
-        }
-
-        public static async Task LogAsync(LogMessage msg)
-        {
-            //TODO: Make this its own class and tidy up
-            switch (msg.Severity)
-            {
-                case LogSeverity.Critical:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Debug:
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Info:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Verbose:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-            }
-        }
-
-        public static void Log(LogMessage msg)
-        {
-            //TODO: Make this its own class and tidy up
-            switch (msg.Severity)
-            {
-                case LogSeverity.Critical:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Debug:
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Info:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Verbose:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-                case LogSeverity.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(msg.ToString());
-                    Console.ResetColor();
-                    break;
-            }
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
